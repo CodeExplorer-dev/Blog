@@ -47,7 +47,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { User, Lock } from '@element-plus/icons-vue'
-import { api } from '../utils/api'
+import { api } from '@/api/requsest'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router';
@@ -73,19 +73,6 @@ const rules = {
   ]
 }
 
-// 登录
-// const login = async () => {
-//   try {
-//     const res = await axios.post(api.baseUrl + '/api/login', formdata.value, {
-//       headers: {
-//         'Content-Type': 'application/json',
-//       }
-//     })
-//   } catch(err) {
-//     console.log(err)
-//   }
-// }
-
 const login = () => {
   // 表单验证
   formdataRef.value.validate(async (valid: any) => {
@@ -93,7 +80,7 @@ const login = () => {
       // localStorage.setItem('token', '111')
       
       const userinfo = formdata.value
-      const res = await axios.post(api.baseUrl + '/api/login', formdata.value,{
+      const res = await axios.post(api.baseUrl + '/api/login', userinfo, {
         headers:{
           'Content-Type': 'application/json',
         }
@@ -108,6 +95,7 @@ const login = () => {
         router.push('/home')
         // 将 token 存储到本地
         localStorage.setItem('token', res.data.token);
+        localStorage.setItem('loginTime', new Date().getTime().toString());
       }else if(res.data.status === 1 ){
         ElMessage({
           message: '登录失败!用户名不存在',
@@ -119,8 +107,6 @@ const login = () => {
           type: 'error',
         })
       }
-      
-      
     }
   })
 }

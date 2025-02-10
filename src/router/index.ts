@@ -6,7 +6,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/login',
+      redirect: '/home',
       name: 'home',
       component: IndexView,
       children: [
@@ -60,13 +60,31 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const isLoggedIn = !!localStorage.getItem('token'); // 假设使用 token 来判断是否登录
+  const token = localStorage.getItem('token');
+  const loginTime = localStorage.getItem('loginTime');
+  const isLoggedIn = !!token;
   const isLoggingOut = localStorage.getItem('loggedOut') === 'true';
+  const tokenExpirationTime = 36000000; // 假设 token 有效期为 1 小时
 
   if (isLoggingOut) {
     // 如果用户已经退出登录，重定向到登录页面
     localStorage.removeItem('loggedOut');
     next('/login');
+  } else if (isLoggedIn && loginTime) {
+    const currentTime = new Date().getTime();
+    const elapsedTime = currentTime - parseInt(loginTime);
+
+    if (elapsedTime > tokenExpirationTime) {
+      // 如果 token 已过期，清除 token 和登录时间，并重定向到登录页面
+      localStorage.removeItem('token');
+      localStorage.removeItem('loginTime');
+      next('/login');
+    } else if (to.path === '/login') {
+      // 如果用户已登录且尝试访问登录页面，重定向到首页
+      next('/');
+    } else {
+      next();
+    }
   } else if (!isLoggedIn && to.path !== '/login') {
     // 如果用户未登录且尝试访问非登录页面，重定向到登录页面
     next('/login');
