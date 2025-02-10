@@ -1,4 +1,4 @@
-import { api } from '@/utils/api'
+import { api } from './requsest'
 import axios from 'axios'
 import { ref } from 'vue'
 

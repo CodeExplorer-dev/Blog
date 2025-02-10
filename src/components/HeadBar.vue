@@ -32,7 +32,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router';
 import { ElButton, ElDrawer } from 'element-plus'
 import axios from 'axios';
-import { api } from '@/utils/api'
+import { api } from '@/api/requsest'
 
 const circleUrl = ref('')
 

@@ -11,7 +11,7 @@
 
 <script setup>
 import { getArticleById } from '@/api/article';
-import { api } from '@/utils/api';
+import { api } from '@/api/requsest';
 import axios from 'axios';
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router';

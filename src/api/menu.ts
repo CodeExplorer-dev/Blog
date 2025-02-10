@@ -1,6 +1,6 @@
 import { HomeFilled, Setting, Notebook, EditPen, User } from '@element-plus/icons-vue'
 import axios from 'axios'
-import { api } from '@/utils/api'
+import { api } from './requsest'
 import { ref } from 'vue'
 
 
