@@ -9,8 +9,10 @@
       <div class="avatar" @click="toMy">
         <el-avatar :size="40" :src="circleUrl" />
       </div>
-      <!-- <el-icon size="20px" class="theme"><Sunny /></el-icon> -->
-      <el-button type="primary" @click="exit">退出</el-button>
+      <el-button type="primary" @click="exit">
+        <el-icon size="16px" style="margin-right: 5px;"><SwitchButton /></el-icon>
+        退出
+      </el-button>
     </div>
   </div>
 
@@ -27,10 +29,10 @@
 </template>
 
 <script lang="ts" setup>
-import { Close } from '@element-plus/icons-vue'
+import { Close, SwitchButton } from '@element-plus/icons-vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router';
-import { ElButton, ElDrawer } from 'element-plus'
+import { ElButton, ElDrawer, ElMessageBox, ElMessage } from 'element-plus'
 import axios from 'axios';
 import { api } from '@/api/requsest'
 
@@ -44,10 +46,34 @@ const backHome = () => {
 
 const visible = ref(false)
 
+// const exit = () => {
+//   // 删除本地存储的 token
+//   localStorage.removeItem('token');
+//   router.push('/login')
+// }
+
 const exit = () => {
-  // 删除本地存储的 token
-  localStorage.removeItem('token');
-  router.push('/login')
+  ElMessageBox.confirm(
+    '确认退出?',
+    'Warning',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  )
+    .then(() => {
+      // 删除本地存储的 token
+      localStorage.removeItem('token');
+      router.push('/login')
+      ElMessage({
+        type: 'success',
+        message: '退出成功',
+      })
+    })
+    .catch(() => {
+      console.log('取消退出')
+    })
 }
 
 const getAvatar = async () => {

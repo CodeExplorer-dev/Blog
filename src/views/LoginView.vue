@@ -1,6 +1,6 @@
 <template>
 <div class="login_page">
-  <div class="login_form">
+  <div class="form" v-if="model === true">
     <h2 class="title">登录</h2>
     <div class="input_container">
 
@@ -39,13 +39,76 @@
           <el-button type="primary" @click="login" class="btn">登录</el-button>
         </el-form-item>
       </el-form>
+
+      <div class="switch">
+        <p @click="switchModel">没有账号? 立即注册</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="form" v-if="model === false">
+    <h2 class="title">注册</h2>
+    <div class="input_container">
+
+      <el-form
+        ref="formdataRef"
+        style="max-width: 600px"
+        :model="formdata"
+        :rules="rules"
+        status-icon
+      >   
+        <!-- 账号 -->
+        <el-form-item prop="username">
+          <el-input placeholder="请输入用户名"
+                    v-model="formdata.username" 
+                    size="large"
+                    class="input">
+            <template #prefix>
+              <el-icon><User /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+        
+        
+        <!-- 密码 -->
+        <el-form-item prop="password">
+          <el-input placeholder="请输入密码"
+                    v-model="formdata.password" 
+                    size="large"
+                    class="input">
+            <template #prefix>
+              <el-icon><Lock /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+
+        <!-- 确认密码 -->
+        <el-form-item prop="confirmPassword">
+          <el-input placeholder="请再次输入密码"
+                    v-model="formdata.confirmPassword"
+                    size="large"
+                    class="input">
+            <template #prefix>
+              <el-icon><Lock /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button type="primary" @click="register" class="btn">注册</el-button>
+        </el-form-item>
+      </el-form>
+
+      <div class="switch">
+        <p @click="switchModel">已有账号? 去登录</p>
+      </div>
     </div>
   </div>
 </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { User, Lock } from '@element-plus/icons-vue'
 import { api } from '@/api/requsest'
 import axios from 'axios'
@@ -54,11 +117,34 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter()
 
+const model = ref(true)
+
+
 const formdataRef = ref()
 const formdata = ref({
   username: '',
-  password: '' 
+  password: '',
+  confirmPassword: '', 
 })
+
+const switchModel = () => {
+  model.value = !model.value 
+  formdata.value = {
+    username: '',
+    password: '',
+    confirmPassword: '',	
+  }
+}
+
+const validateConfirmPassword = (rule: any, value: any, callback: any) => {
+	if (value === '') {
+		callback(new Error('请再次输入密码'))
+	} else if (value !== formdata.value.password) {
+		callback(new Error('两次输入密码不一致!'))
+	} else {
+		callback()
+	}
+}
 
 // 表单验证 
 // 规则
@@ -70,7 +156,11 @@ const rules = {
   password: [
     { required: true, message: '请输入密码', trigger: ['blur', 'change'] },
     { min: 6, max: 12, message: '用户密码长度必须在6到12位之间', trigger: 'change' },
-  ]
+  ],
+  confirmPassword: [
+		{ required: true, message: '请再次输入密码', trigger: ['blur', 'change'] },
+		{ validator: validateConfirmPassword, trigger: 'change' },
+	],
 }
 
 const login = () => {
@@ -78,14 +168,16 @@ const login = () => {
   formdataRef.value.validate(async (valid: any) => {
     if(valid){
       // localStorage.setItem('token', '111')
-      
-      const userinfo = formdata.value
+      const { username, password } = formdata.value
+      const userinfo = {
+        username,
+        password,
+      }
       const res = await axios.post(api.baseUrl + '/api/login', userinfo, {
         headers:{
           'Content-Type': 'application/json',
         }
       })
-      console.log(res.data);
       if(res.data.status === 0 ){
         ElMessage({
           message: '登录成功',
@@ -111,7 +203,42 @@ const login = () => {
   })
 }
 
-
+const register = () => {
+  // 表单验证
+  formdataRef.value.validate(async (valid: any) => {
+    if(valid){
+      // localStorage.setItem('token', '111')
+      const { username, password } = formdata.value
+      const userinfo = {
+        username,
+        password,
+      }
+      const res = await axios.post(api.baseUrl + '/api/register', userinfo, {
+        headers:{
+          'Content-Type': 'application/json',
+        }
+      })
+      if(res.data.status === 0 ){
+        ElMessage({
+          message: '注册成功',
+          type: 'success',
+        })
+        // 注册成功后跳转到登录
+        router.push('/login')
+      }else if(res.data.status === 1 ){
+        ElMessage({
+          message: '注册失败!',
+          type: 'error',
+        })
+      }else if(res.data.status === 2 ){
+        ElMessage({
+          message: '用户名被占用',
+          type: 'error',
+        })
+      }
+    }
+  })
+}
 
 </script>
 
@@ -121,7 +248,7 @@ const login = () => {
   width: 100%;
   background-color: #f1f0f0;
 
-  .login_form{
+  .form{
     position: absolute;
     width: 400px;
 
@@ -156,6 +283,15 @@ const login = () => {
       font-size: 16px;
       letter-spacing: 2px;
     }
+  }
+}
+.switch{
+  cursor: pointer;
+  text-align: center;
+  color: #242525;
+  &:hover{
+    color: #474848;
+    text-decoration: underline;
   }
 }
 </style>
