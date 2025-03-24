@@ -1,6 +1,6 @@
 <template>
   <div class="title">
-    <h2>测试</h2>
+    <h2>测试页</h2>
     <el-button @click="fetchOverviewData">获取用户信息</el-button>
     <el-button @click="fetchArticleData">获取文章列表</el-button>
     <el-button @click="fetchLabelData">获取标签列表</el-button>
